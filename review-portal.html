@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Review Portal - KK Homemade Cookies</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ruby: {
+                            800: '#5C0D11',
+                            900: '#3D070A',
+                            950: '#2A0305',
+                        },
+                        luxgold: {
+                            200: '#FFF1B0',
+                            300: '#FFE58F',
+                            400: '#E6CA65',
+                            500: '#D4AF37',
+                            600: '#AA820A',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gold-border-glow {
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
+            border: 2px solid #D4AF37;
+        }
+        .certificate-card {
+            background: linear-gradient(135deg, #3D070A 0%, #5C0D11 50%, #200204 100%);
+            box-shadow: 0 15px 35px rgba(92, 13, 17, 0.4);
+            border: 3px solid #E6CA65;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-[#FFF8F0] via-[#FFF3E4] to-[#FCEFE0] text-gray-950 min-h-screen py-10 px-4 flex flex-col items-center justify-center font-sans">
+
+    <div class="max-w-xl w-full space-y-6">
+        
+        <!-- Header Banner & Admin Toggle -->
+        <div class="flex justify-between items-center bg-gradient-to-r from-ruby-950 via-ruby-900 to-ruby-950 text-white p-6 rounded-3xl gold-border-glow relative overflow-hidden">
+            <!-- Festive Background Watermark -->
+            <div class="absolute right-3 -bottom-3 text-7xl opacity-20 select-none pointer-events-none">🪔✨</div>
+            
+            <div class="flex items-center gap-3.5 z-10">
+                <!-- Portal Logo -->
+                <img id="portal-logo" src="" alt="Logo" class="w-14 h-14 object-cover rounded-full border-2 border-luxgold-300 shadow-xl hidden">
+                <div>
+                    <h1 class="text-xl font-black tracking-wide text-luxgold-300 flex items-center gap-2 drop-shadow">
+                        <span>🪔</span> Customer Review Portal
+                    </h1>
+                    <p class="text-xs text-white font-bold tracking-wide mt-1">✨ Share your homemade cookie experience ✨</p>
+                </div>
+            </div>
+            <button onclick="toggleAdminPanel()" id="admin-toggle-btn" class="z-10 bg-luxgold-400 hover:bg-luxgold-300 text-ruby-950 font-black px-4 py-2.5 rounded-xl text-xs transition shadow-lg transform hover:scale-105 border-2 border-white">
+                ⚙️ Admin
+            </button>
+        </div>
+
+        <!-- ADMIN PANEL SECTION (Strictly hides feedback form when open) -->
+        <div id="admin-panel" class="hidden bg-white p-6 rounded-3xl shadow-2xl border-2 border-ruby-900 space-y-6 text-gray-950">
+            <div class="flex justify-between items-center border-b border-gray-300 pb-3">
+                <h2 class="font-black text-ruby-950 text-base flex items-center gap-2"><span>🛡️</span> Admin Management Console</h2>
+                <button onclick="toggleAdminPanel()" class="text-xs text-red-700 font-bold hover:underline">Close Admin [X]</button>
+            </div>
+
+            <!-- Admin Tabs Navigation -->
+            <div class="flex border-b border-gray-300 pb-2 gap-2">
+                <button onclick="switchAdminTab('reviews')" id="tab-btn-reviews" class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-ruby-900 text-white shadow transition">💬 Customer Reviews (<span id="admin-review-count">0</span>)</button>
+                <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="px-3.5 py-1.5 rounded-xl text-xs font-black bg-gray-200 text-gray-900 hover:bg-gray-300 transition">🖼️ Portal Logo Manager</button>
+            </div>
+
+            <!-- Tab 1: Reviews List -->
+            <div id="admin-tab-reviews" class="space-y-3">
+                <p class="text-xs font-bold text-gray-800">Read and manage all customer ratings, order items, and price valuations.</p>
+                <div id="admin-reviews-list" class="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                    <p class="text-xs text-gray-500">Loading reviews...</p>
+                </div>
+            </div>
+
+            <!-- Tab 2: Logo Manager -->
+            <div id="admin-tab-settings" class="space-y-4 hidden">
+                <p class="text-xs font-bold text-gray-800">Paste your direct Review Portal logo image link below (e.g., Google Drive link formatted as `https://lh3.googleusercontent.com/d/...`).</p>
+                <div>
+                    <label class="block text-xs font-black text-ruby-950 mb-1">Logo Image Link URL:</label>
+                    <input type="text" id="setting-logo-url" placeholder="https://..." class="w-full border-2 border-gray-400 p-2.5 rounded-xl text-xs bg-gray-50 text-gray-950 font-bold focus:outline-none focus:ring-2 focus:ring-ruby-900">
+                </div>
+                <button onclick="saveReviewPortalLogo()" class="w-full bg-ruby-900 hover:bg-ruby-950 text-white font-black py-2.5 rounded-xl text-xs shadow-md transition">Save Portal Logo</button>
+            </div>
+        </div>
+
+        <!-- CUSTOMER REVIEW FORM CARD -->
+        <div id="review-card-container" class="bg-white p-8 rounded-3xl shadow-2xl border-2 border-luxgold-500 relative overflow-hidden">
+            
+            <!-- Top Decorative Gradient Line -->
+            <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-luxgold-500 via-ruby-900 to-luxgold-500"></div>
+
+            <div class="flex items-center justify-between mb-4 pt-1">
+                <h2 class="text-lg font-black text-ruby-950 flex items-center gap-2">
+                    <span>✍️</span> Submit Your Review
+                </h2>
+                <span class="text-xs font-black bg-amber-200 text-ruby-950 px-3 py-1 rounded-full border border-luxgold-600 shadow-sm">Verified Order Only</span>
+            </div>
+            
+            <form id="review-form" onsubmit="submitCustomerReview(event)" class="space-y-4">
+                
+                <!-- Order ID Verification (Strict ORD- Prefix + 4 Digits) -->
+                <div>
+                    <label class="block text-xs font-black text-ruby-950 mb-1">Order ID *</label>
+                    <div class="flex shadow-sm rounded-xl overflow-hidden border-2 border-ruby-900">
+                        <span class="bg-ruby-900 px-4 py-2.5 text-sm font-black text-luxgold-200 flex items-center select-none">ORD-</span>
+                        <input type="text" id="review-order-digits" maxlength="4" pattern="\d{4}" placeholder="4821" required
+                            oninput="lookupCustomerOrder()"
+                            class="w-full p-2.5 text-sm bg-white text-gray-950 focus:outline-none font-mono font-black tracking-widest placeholder-gray-400">
+                    </div>
+                    <p id="order-lookup-msg" class="text-xs font-extrabold text-gray-700 mt-1">Enter your 4-digit order number received after placing your order.</p>
+                </div>
+
+                <!-- Customer Name (Auto-Populated from Order) -->
+                <div>
+                    <label class="block text-xs font-black text-ruby-950 mb-1">Customer Name</label>
+                    <input type="text" id="review-name" placeholder="Name will appear automatically..." readonly
+                        class="w-full p-2.5 border-2 border-gray-300 rounded-xl text-sm bg-gray-100 text-gray-900 font-extrabold cursor-not-allowed shadow-inner">
+                </div>
+
+                <!-- Overall Cookie Rating -->
+                <div>
+                    <label class="block text-xs font-black text-ruby-950 mb-1">Overall Cookie Quality & Taste *</label>
+                    <select id="review-rating" class="w-full p-2.5 border-2 border-gray-300 rounded-xl text-sm bg-white text-gray-950 focus:outline-none focus:ring-2 focus:ring-luxgold-500 font-bold shadow-sm">
+                        <option value="5">⭐⭐⭐⭐⭐ (5/5) - Extremely Delicious!</option>
+                        <option value="4">⭐⭐⭐⭐ (4/5) - Very Good</option>
+                        <option value="3">⭐⭐⭐ (3/5) - Average</option>
+                        <option value="2">⭐⭐ (2/5) - Needs Improvement</option>
+                        <option value="1">⭐ (1/5) - Poor</option>
+                    </select>
+                </div>
+
+                <!-- Price Feedback Section -->
+                <div>
+                    <label class="block text-xs font-black text-ruby-950 mb-1">Price Value Feedback *</label>
+                    <select id="review-price-rating" class="w-full p-2.5 border-2 border-gray-300 rounded-xl text-sm bg-white text-gray-950 focus:outline-none focus:ring-2 focus:ring-luxgold-500 font-bold shadow-sm">
+                        <option value="Very Reasonable & Worth It">💰 Very Reasonable & Worth It</option>
+                        <option value="Fairly Priced">👍 Fairly Priced for Homemade Quality</option>
+                        <option value="A Bit Expensive">⚠️ A Bit Expensive</option>
+                        <option value="Too Pricey">❌ Too Pricey</option>
+                    </select>
+                </div>
+
+                <!-- Comment -->
+                <div>
+                    <label class="block text-xs font-black text-ruby-950 mb-1">Comments / Suggestions *</label>
+                    <textarea id="review-comment" rows="3" placeholder="Share your experience regarding texture, taste, packaging..." required
+                        class="w-full p-2.5 border-2 border-gray-300 rounded-xl text-sm bg-white text-gray-950 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-luxgold-500 font-bold shadow-sm"></textarea>
+                </div>
+
+                <button type="submit" id="submit-btn" disabled class="w-full bg-gray-200 text-gray-500 font-bold py-3.5 rounded-xl cursor-not-allowed transition shadow-sm flex items-center justify-center gap-2">
+                    Submit Review 🌟
+                </button>
+            </form>
+        </div>
+
+        <!-- HIGH-IMPACT "WOW" POST-REVIEW APPRECIATION CARD -->
+        <div id="success-card" class="hidden certificate-card text-white p-8 rounded-3xl text-center relative overflow-hidden transition-all duration-300">
+            
+            <div class="absolute top-4 right-4 text-xs font-black bg-luxgold-400 text-ruby-950 px-3.5 py-1 rounded-full uppercase tracking-widest shadow-lg border-2 border-white">
+                Verified Review ✓
+            </div>
+
+            <div class="space-y-2 mt-2 flex flex-col items-center">
+                <!-- Card Logo -->
+                <img id="success-logo" src="" alt="Logo" class="w-20 h-20 object-cover rounded-full border-3 border-luxgold-300 shadow-2xl mb-1 hidden">
+                <div class="text-3xl">🪔✨🪔</div>
+                <h3 class="text-xs uppercase font-black tracking-widest text-luxgold-300">Official Appreciation Certificate</h3>
+                <h2 class="text-3xl font-black text-white drop-shadow-md">
+                    Thank You, <span id="success-name" class="text-luxgold-300 underline"></span>!
+                </h2>
+            </div>
+
+            <div class="my-6 bg-black/60 backdrop-blur-md p-5 rounded-2xl border-2 border-luxgold-400 text-xs space-y-2.5 text-white text-left shadow-inner">
+                <div class="flex justify-between items-center border-b border-luxgold-400/50 pb-2">
+                    <span class="text-luxgold-300 font-black">Order ID Verification:</span>
+                    <span id="success-order-id" class="font-mono font-black bg-luxgold-400/30 text-luxgold-200 px-2.5 py-0.5 rounded border border-luxgold-400"></span>
+                </div>
+                <p><strong>Ordered Items:</strong> <span id="success-items" class="italic text-luxgold-100 font-bold"></span></p>
+                <p class="text-[11px] text-gray-200 pt-1">Your valuable feedback regarding our festive cookies has been securely recorded.</p>
+            </div>
+
+            <!-- Wow Deepavali Message Box -->
+            <div class="py-4 px-4 bg-gradient-to-r from-ruby-950 via-black to-ruby-950 rounded-2xl border-2 border-luxgold-400 space-y-1.5 shadow-xl">
+                <h3 class="text-2xl font-black text-luxgold-300 drop-shadow">✨ Happy Deepavali! 🎆</h3>
+                <p class="text-xs text-white leading-relaxed max-w-md mx-auto font-bold">
+                    May the festival of lights fill your life with sweet happiness, robust good health, and abundant prosperity!
+                </p>
+            </div>
+
+            <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="window.print()" class="bg-luxgold-400 hover:bg-luxgold-300 text-ruby-950 font-black px-6 py-3 rounded-xl text-xs transition shadow-xl flex items-center justify-center gap-1 transform hover:scale-105 border-2 border-white">
+                    📷 Save / Print Card
+                </button>
+                <a href="https://yuga146.github.io/KK-HOMEMADE-COOKIES/" class="bg-white/20 hover:bg-white/30 text-white font-extrabold px-5 py-3 rounded-xl text-xs border-2 border-luxgold-300 transition flex items-center justify-center shadow-md">
+                    Return to Store
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer Navigation Link -->
+        <div class="text-center pt-2">
+            <a href="https://yuga146.github.io/KK-HOMEMADE-COOKIES/" class="text-xs font-black text-ruby-950 hover:text-ruby-800 transition underline tracking-wide">← Go back to Cookie Store</a>
+        </div>
+
+    </div>
+
+    <!-- Firebase Script Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDgcBDdJaGkEBS1ihJASDAayNHWgrJ-UN8",
+            authDomain: "deepavalicookies2026.firebaseapp.com",
+            databaseURL: "https://deepavalicookies2026-default-rtdb.firebaseio.com/",
+            projectId: "deepavalicookies2026",
+            storageBucket: "deepavalicookies2026.firebasestorage.app",
+            messagingSenderId: "648876725443",
+            appId: "1:648876725443:web:beabca40332d99f90fbe76",
+            measurementId: "G-CH5L1EP9SK"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let verifiedOrderData = null;
+
+        // Load Portal Logo in real-time
+        onSnapshot(doc(db, "settings", "review_portal"), (docSnap) => {
+            const portalLogoImg = document.getElementById('portal-logo');
+            const successLogoImg = document.getElementById('success-logo');
+            const logoInput = document.getElementById('setting-logo-url');
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.logoUrl) {
+                    portalLogoImg.src = data.logoUrl;
+                    portalLogoImg.classList.remove('hidden');
+                    successLogoImg.src = data.logoUrl;
+                    successLogoImg.classList.remove('hidden');
+                    if (logoInput) logoInput.value = data.logoUrl;
+                } else {
+                    portalLogoImg.classList.add('hidden');
+                    successLogoImg.classList.add('hidden');
+                }
+            }
+        });
+
+        // Save Logo URL to Firestore
+        window.saveReviewPortalLogo = async function() {
+            const logoUrl = document.getElementById('setting-logo-url').value.trim();
+            try {
+                await setDoc(doc(db, "settings", "review_portal"), { logoUrl });
+                alert("✨ Review portal logo updated successfully!");
+            } catch (err) {
+                console.error("Error saving logo:", err);
+                alert("Failed to save logo URL.");
+            }
+        };
+
+        // Admin Tab Switcher
+        window.switchAdminTab = function(tabName) {
+            document.getElementById('admin-tab-reviews').classList.add('hidden');
+            document.getElementById('admin-tab-settings').classList.add('hidden');
+            document.getElementById('tab-btn-reviews').className = "px-3.5 py-1.5 rounded-xl text-xs font-black bg-gray-200 text-gray-900 hover:bg-gray-300 transition";
+            document.getElementById('tab-btn-settings').className = "px-3.5 py-1.5 rounded-xl text-xs font-black bg-gray-200 text-gray-900 hover:bg-gray-300 transition";
+
+            document.getElementById(`admin-tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-btn-${tabName}`).className = "px-3.5 py-1.5 rounded-xl text-xs font-black bg-ruby-900 text-white shadow transition";
+        };
+
+        // Order ID Verification & Name Lookup
+        window.lookupCustomerOrder = async function() {
+            const digits = document.getElementById('review-order-digits').value.trim();
+            const msg = document.getElementById('order-lookup-msg');
+            const nameInput = document.getElementById('review-name');
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (digits.length < 4) {
+                msg.innerText = "Enter your 4-digit order number received after placing your order.";
+                msg.className = "text-xs font-extrabold text-gray-700 mt-1";
+                nameInput.value = "";
+                submitBtn.disabled = true;
+                submitBtn.className = "w-full bg-gray-200 text-gray-500 font-bold py-3.5 rounded-xl cursor-not-allowed transition shadow-sm flex items-center justify-center gap-2";
+                verifiedOrderData = null;
+                return;
+            }
+
+            const fullOrderId = `ORD-${digits}`;
+            msg.innerText = "🔍 Verifying Order ID...";
+            msg.className = "text-xs font-black text-ruby-900 mt-1";
+
+            try {
+                const ordersRef = collection(db, "orders");
+                const qOrder = query(ordersRef, where("orderId", "==", fullOrderId));
+                const orderSnapshot = await getDocs(qOrder);
+
+                if (orderSnapshot.empty) {
+                    msg.innerText = `❌ Order ${fullOrderId} not found. Please verify your order number!`;
+                    msg.className = "text-xs font-black text-red-700 mt-1";
+                    nameInput.value = "";
+                    submitBtn.disabled = true;
+                    submitBtn.className = "w-full bg-gray-200 text-gray-500 font-bold py-3.5 rounded-xl cursor-not-allowed transition shadow-sm flex items-center justify-center gap-2";
+                    verifiedOrderData = null;
+                    return;
+                }
+
+                // Check for duplicate submission
+                const reviewsRef = collection(db, "reviews");
+                const qReview = query(reviewsRef, where("orderId", "==", fullOrderId));
+                const reviewSnapshot = await getDocs(qReview);
+
+                if (!reviewSnapshot.empty) {
+                    msg.innerText = `⚠️ Review Already Submitted! Order ${fullOrderId} has already submitted feedback.`;
+                    msg.className = "text-xs font-black text-amber-900 mt-1";
+                    
+                    const orderDoc = orderSnapshot.docs[0].data();
+                    nameInput.value = orderDoc.customerName || "Valued Customer";
+
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = "Review Already Submitted 🚫";
+                    submitBtn.className = "w-full bg-red-100 text-red-900 border-2 border-red-400 font-black py-3.5 rounded-xl cursor-not-allowed transition shadow-sm";
+                    verifiedOrderData = null;
+                    return;
+                }
+
+                const orderDoc = orderSnapshot.docs[0].data();
+                verifiedOrderData = orderDoc;
+                
+                nameInput.value = orderDoc.customerName || "Valued Customer";
+                
+                msg.innerText = `✅ Order verified! Welcome, ${orderDoc.customerName}.`;
+                msg.className = "text-xs font-black text-green-800 mt-1";
+
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Submit Review 🌟";
+                submitBtn.className = "w-full bg-gradient-to-r from-ruby-900 to-ruby-950 hover:from-ruby-800 hover:to-ruby-900 text-white font-black py-3.5 rounded-xl cursor-pointer transition shadow-lg flex items-center justify-center gap-2";
+
+            } catch (err) {
+                console.error("Error looking up order:", err);
+                msg.innerText = "⚠️ Error verifying order. Please try again.";
+                msg.className = "text-xs font-black text-red-700 mt-1";
+            }
+        };
+
+        // Submit customer review
+        window.submitCustomerReview = async function(event) {
+            event.preventDefault();
+
+            if (!verifiedOrderData) {
+                alert("Please enter a valid, unreviewed 4-digit Order ID first!");
+                return;
+            }
+
+            const digits = document.getElementById('review-order-digits').value.trim();
+            const fullOrderId = `ORD-${digits}`;
+            const name = document.getElementById('review-name').value.trim();
+            const rating = parseInt(document.getElementById('review-rating').value);
+            const priceRating = document.getElementById('review-price-rating').value;
+            const comment = document.getElementById('review-comment').value.trim();
+
+            let itemsSummary = verifiedOrderData.items ? verifiedOrderData.items.map(i => `${i.name} (x${i.qty})`).join(', ') : 'Festive Cookies';
+
+            try {
+                await addDoc(collection(db, "reviews"), {
+                    orderId: fullOrderId,
+                    customerName: name,
+                    rating: rating,
+                    priceRating: priceRating,
+                    comment: comment,
+                    itemsOrdered: itemsSummary,
+                    timestamp: new Date().toISOString()
+                });
+
+                document.getElementById('review-card-container').classList.add('hidden');
+                document.getElementById('success-name').innerText = name;
+                document.getElementById('success-order-id').innerText = fullOrderId;
+                document.getElementById('success-items').innerText = itemsSummary;
+                document.getElementById('success-card').classList.remove('hidden');
+
+            } catch (err) {
+                console.error("Error submitting review:", err);
+                alert("Failed to submit review. Please try again.");
+            }
+        };
+
+        // Toggle Admin Panel & HIDE customer review card while admin is open
+        window.toggleAdminPanel = function() {
+            const panel = document.getElementById('admin-panel');
+            const reviewCard = document.getElementById('review-card-container');
+            const isHidden = panel.classList.contains('hidden');
+
+            if (isHidden) {
+                const pin = prompt("Enter Admin PIN:");
+                if (pin !== "1234") {
+                    if (pin !== null) alert("Incorrect PIN!");
+                    return;
+                }
+                panel.classList.remove('hidden');
+                reviewCard.classList.add('hidden'); // Completely hides feedback entry form from admin view
+                switchAdminTab('reviews');
+                loadAdminReviews();
+            } else {
+                panel.classList.add('hidden');
+                reviewCard.classList.remove('hidden'); // Shows feedback form back when exiting admin
+            }
+        };
+
+        // Load reviews in Admin Panel
+        function loadAdminReviews() {
+            onSnapshot(collection(db, "reviews"), (snapshot) => {
+                const container = document.getElementById('admin-reviews-list');
+                const countBadge = document.getElementById('admin-review-count');
+                if (!container) return;
+
+                countBadge.innerText = snapshot.size;
+
+                if (snapshot.empty) {
+                    container.innerHTML = '<p class="text-xs font-bold text-gray-600">No customer reviews recorded yet.</p>';
+                    return;
+                }
+
+                const reviews = snapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+                reviews.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                container.innerHTML = '';
+                reviews.forEach(r => {
+                    const stars = '⭐'.repeat(r.rating || 5);
+                    const formattedDate = r.timestamp ? new Date(r.timestamp).toLocaleString() : 'N/A';
+
+                    container.innerHTML += `
+                        <div class="bg-amber-50 p-4 rounded-xl border-2 border-luxgold-500 text-xs space-y-2 relative shadow-md">
+                            <div class="flex justify-between items-start font-black text-gray-950 border-b border-amber-300 pb-2">
+                                <div>
+                                    <span class="text-ruby-950 text-sm font-black">${r.customerName}</span>
+                                    <span class="text-gray-800 font-mono font-bold ml-1">(${r.orderId})</span>
+                                </div>
+                                <span class="text-amber-600 tracking-wider">${stars}</span>
+                            </div>
+                            <p class="text-gray-900 font-bold"><strong>Ordered:</strong> <span class="text-gray-950">${r.itemsOrdered || 'N/A'}</span></p>
+                            <p class="text-gray-900 font-bold"><strong>Price Feedback:</strong> <span class="text-ruby-950 font-black">${r.priceRating || 'N/A'}</span></p>
+                            <p class="text-gray-950 font-semibold bg-white p-2.5 rounded-lg border border-amber-300 italic shadow-inner">"${r.comment}"</p>
+                            <div class="flex justify-between items-center pt-1 text-[11px] font-bold text-gray-700">
+                                <span>${formattedDate}</span>
+                                <button onclick="deleteReview('${r.docId}')" class="bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded-lg font-black transition shadow">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        window.deleteReview = async function(docId) {
+            if (confirm("Are you sure you want to delete this customer review?")) {
+                try {
+                    await deleteDoc(doc(db, "reviews", docId));
+                } catch (err) {
+                    console.error("Error deleting review:", err);
+                    alert("Failed to delete review.");
+                }
+            }
+        };
+    </script>
+</body>
+</html>
